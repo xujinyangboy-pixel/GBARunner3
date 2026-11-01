@@ -471,6 +471,23 @@ extern "C" void gbaRunnerMain(int argc, char* argv[])
         GFX_PLTT_BG_MAIN[0] = 0x1F << 10;
         while (1);
     }
+    { // DEBUG: dump argv bytes to SD
+        FIL dbg;
+        if (f_open(&dbg, "/argv_dump.txt", FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
+            char buf[1024];
+            int n = mini_snprintf(buf, sizeof(buf), "argc=%d\n", argc);
+            for (int i = 0; i < argc && n < (int)sizeof(buf) - 8; i++) {
+                n += mini_snprintf(buf + n, sizeof(buf) - n, "argv[%d]=", i);
+                unsigned char *p = (unsigned char *)argv[i];
+                while (*p && n < (int)sizeof(buf) - 4)
+                    n += mini_snprintf(buf + n, sizeof(buf) - n, "%02X ", *p++);
+                n += mini_snprintf(buf + n, sizeof(buf) - n, "\nstr=%s\n", argv[i]);
+            }
+            UINT bw = 0;
+            f_write(&dbg, buf, n, &bw);
+            f_close(&dbg);
+        }
+    }
 
     // if (Environment::SupportsAgbSemihosting())
         // mountAgbSemihosting();
