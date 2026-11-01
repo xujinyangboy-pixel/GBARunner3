@@ -472,9 +472,9 @@ extern "C" void gbaRunnerMain(int argc, char* argv[])
         while (1);
     }
     { // DEBUG: dump argv bytes to SD
-        FIL dbg;
+        static FIL dbg;
+        static char buf[1024];
         if (f_open(&dbg, "/argv_dump.txt", FA_CREATE_ALWAYS | FA_WRITE) == FR_OK) {
-            char buf[1024];
             int n = mini_snprintf(buf, sizeof(buf), "argc=%d\n", argc);
             for (int i = 0; i < argc && n < (int)sizeof(buf) - 8; i++) {
                 n += mini_snprintf(buf + n, sizeof(buf) - n, "argv[%d]=", i);
@@ -488,6 +488,7 @@ extern "C" void gbaRunnerMain(int argc, char* argv[])
             f_close(&dbg);
         }
     }
+
 
     // if (Environment::SupportsAgbSemihosting())
         // mountAgbSemihosting();
